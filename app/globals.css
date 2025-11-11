@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #0b0b0b;
+  --primary: #0036d4;
+  --primary-foreground: #ffffff;
+  --secondary: #e3e8ff;
+  --secondary-foreground: #0036d4;
+  --muted: #f0f4ff;
+  --muted-foreground: #5b6b88;
+  --accent: #e3e8ff;
+  --accent-foreground: #0036d4;
+  --border: #d8e3ff;
+  --input: #d8e3ff;
+  --ring: #7da8ff;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0b0b0b;
+  --sidebar-primary: #0036d4;
+  --sidebar-primary-foreground: #ffffff;
+}
+
+.dark {
+  --background: #0b0b0b;
+  --foreground: #ffffff;
+  --primary: #7da8ff;
+  --primary-foreground: #0b0b0b;
+  --secondary: #1b1f36;
+  --secondary-foreground: #ffffff;
+  --muted: #1b1f36;
+  --muted-foreground: #7ba4ff;
+  --border: rgba(255,255,255,0.1);
+  --input: rgba(255,255,255,0.15);
+
+  --sidebar: #0b0b0b;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #4c8aff;
+  --sidebar-primary-foreground: #000;
+}
+
+/* Base */
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ⚽ Sport Stadium Theme */
+.body-sport {
+  background: radial-gradient(circle at top, #0036d4, #000);
+}
+
+/* Frosted Glass */
+.glass-card {
+  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(0,150,255,0.35);
+}
+
+/* Sport Blue Button */
+.btn-sport {
+  background: linear-gradient(45deg, #005eff, #00b7ff);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(0,150,255,0.8);
+  transition: .25s;
+}
+.btn-sport:hover {
+  box-shadow: 0 0 26px rgba(0,150,255,1);
+  transform: scale(1.05);
+}
