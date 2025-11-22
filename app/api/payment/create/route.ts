@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import midtransClient from "midtrans-client";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs"; // midtrans-client only runs on Node
+export const runtime = "nodejs"; // Midtrans client hanya jalan di Node
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +13,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Booking ID diperlukan" }, { status: 400 });
     }
 
-    // Ambil data booking
+    // Validasi env Midtrans
+    if (!process.env.MIDTRANS_SERVER_KEY) {
+      return NextResponse.json(
+        { error: "MIDTRANS_SERVER_KEY tidak ditemukan di environment" },
+        { status: 500 }
+      );
+    }
+
+    // Ambil data booking + relasi user & field
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
       include: { user: true, field: true },
@@ -24,20 +32,25 @@ export async function POST(req: Request) {
     }
 
     if (booking.status !== "APPROVED") {
-      return NextResponse.json({ error: "Booking belum disetujui admin" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Booking belum disetujui admin" },
+        { status: 403 }
+      );
     }
 
-    // Inisialisasi Midtrans
+    // Inisialisasi Midtrans Snap
     const snap = new midtransClient.Snap({
       isProduction: false,
       serverKey: process.env.MIDTRANS_SERVER_KEY!,
-      clientKey: process.env.MIDTRANS_CLIENT_KEY!,
     });
 
-    // Buat transaksi
+    // Generate order_id aman
+    const orderId = `SPORTBOOK-${booking.id}`.substring(0, 45);
+
+    // Buat transaksi Snap
     const transaction = await snap.createTransaction({
       transaction_details: {
-        order_id: `SPORTBOOK-${booking.id}`,
+        order_id: orderId,
         gross_amount: booking.field.price,
       },
       customer_details: {
@@ -47,29 +60,24 @@ export async function POST(req: Request) {
       item_details: [
         {
           id: booking.field.id,
+          name: booking.field.name,
           price: booking.field.price,
           quantity: 1,
-          name: booking.field.name,
         },
       ],
       enabled_payments: ["gopay", "qris", "bca_va", "bni_va", "bri_va"],
     });
 
-    const paymentUrl = transaction.redirect_url;
-
-    // Simpan status payment pending
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: "PENDING" },
-    });
-
     return NextResponse.json({
       ok: true,
-      paymentUrl,
       token: transaction.token,
+      paymentUrl: transaction.redirect_url,
     });
   } catch (err) {
-    console.error("Midtrans payment error:", err);
-    return NextResponse.json({ error: "Gagal membuat pembayaran" }, { status: 500 });
+    console.error("🔥 Midtrans payment error:", err);
+    return NextResponse.json(
+      { error: "Gagal membuat pembayaran" },
+      { status: 500 }
+    );
   }
 }

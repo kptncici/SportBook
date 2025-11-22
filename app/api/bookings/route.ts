@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     const statusParam = searchParams.get("status") || "PENDING";
     const dateParam = searchParams.get("date");
 
-    const allowedStatuses = ["PENDING", "APPROVED", "REJECTED", "CANCELED", "ALL"];
+    const allowedStatuses = ["PENDING", "APPROVED", "REJECTED", "CANCELED", "PAID", "ALL"];
     const status = allowedStatuses.includes(statusParam)
       ? statusParam
       : "PENDING";
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔹 Pastikan field (lapangan) tersedia
+    // 🔹 Pastikan lapangan ada
     const field = await prisma.field.findUnique({ where: { id: fieldId } });
     if (!field) {
       return NextResponse.json(
@@ -95,6 +95,11 @@ export async function POST(req: Request) {
       );
     }
 
+    // ---------------------------------------------------------
+    // 🎯 FIX UTAMA: paymentMethod HARUS hanya MIDTRANS
+    // ---------------------------------------------------------
+    const finalPaymentMethod = "MIDTRANS"; // default dan satu-satunya pilihan
+
     // 🔹 Simpan booking
     const booking = await prisma.booking.create({
       data: {
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
         date: new Date(date),
         timeStart,
         timeEnd,
-        paymentMethod: paymentMethod || "CASH",
+        paymentMethod: finalPaymentMethod,
         status: "PENDING",
       },
       include: {

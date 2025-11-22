@@ -15,6 +15,9 @@ model User {
   role      Role      @default(USER)
   createdAt DateTime  @default(now())
   bookings  Booking[]
+
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
 }
 
 model Field {
@@ -40,9 +43,10 @@ model Booking {
   checkedIn     Boolean       @default(false)
   paymentMethod PaymentMethod @default(MIDTRANS)
   transactionId String?       @unique
-  field         Field         @relation(fields: [fieldId], references: [id])
-  transaction   Transaction?  @relation(fields: [transactionId], references: [id])
-  user          User          @relation(fields: [userId], references: [id])
+
+  field       Field        @relation(fields: [fieldId], references: [id])
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
 }
 
 model Transaction {
@@ -54,12 +58,12 @@ model Transaction {
   raw         Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   booking     Booking?
 }
 
 enum Role {
   USER
-  OWNER
   ADMIN
 }
 
@@ -73,5 +77,4 @@ enum BookingStatus {
 
 enum PaymentMethod {
   MIDTRANS
-  CASH
 }

@@ -21,17 +21,20 @@ export default function AdminApprovalPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  // 🔹 Ambil data booking berdasarkan filter
+  // Load data
   async function load() {
     try {
       setLoading(true);
       const qs = new URLSearchParams();
       if (search) qs.set("search", search);
-      if (status && status !== "ALL") qs.set("status", status);
+      if (status !== "ALL") qs.set("status", status);
       if (from) qs.set("from", from);
       if (to) qs.set("to", to);
 
-      const res = await fetch(`/api/bookings?${qs.toString()}`, { cache: "no-store" });
+      const res = await fetch(`/api/bookings?${qs.toString()}`, {
+        cache: "no-store",
+      });
+
       const data = await res.json();
       setRows(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -45,21 +48,25 @@ export default function AdminApprovalPage() {
     load();
   }, []);
 
-  // 🔹 Terapkan filter manual
+  // Filter submit
   function onApplyFilters(e: React.FormEvent) {
     e.preventDefault();
     load();
   }
 
-  // 🔹 Approve / Reject booking
+  // Approve / Reject
   async function handleAction(id: string, action: "approve" | "reject") {
     const confirmMsg =
       action === "approve"
         ? "Yakin ingin menyetujui booking ini?"
         : "Yakin ingin menolak booking ini?";
+
     if (!confirm(confirmMsg)) return;
 
-    const res = await fetch(`/api/bookings/${id}/${action}`, { method: "PATCH" });
+    const res = await fetch(`/api/bookings/${id}/${action}`, {
+      method: "PATCH",
+    });
+
     if (res.ok) {
       alert(action === "approve" ? "✅ Booking disetujui!" : "❌ Booking ditolak!");
       load();
@@ -68,60 +75,67 @@ export default function AdminApprovalPage() {
     }
   }
 
-  // 🔹 Hitung total harga
-  const total = useMemo(() => rows.reduce((sum, b) => sum + (b.field?.price ?? 0), 0), [rows]);
+  // Hitung total
+  const total = useMemo(
+    () => rows.reduce((sum, b) => sum + (b.field?.price ?? 0), 0),
+    [rows]
+  );
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
+    <div className="p-4 md:p-6 space-y-6">
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 className="text-2xl font-bold">✅ Approval Booking</h1>
+        <h1 className="text-xl md:text-2xl font-bold">✅ Approval Booking</h1>
       </div>
 
-      {/* Filter */}
+      {/* FILTER */}
       <form
         onSubmit={onApplyFilters}
-        className="bg-white border rounded-lg p-4 grid md:grid-cols-5 gap-3"
+        className="bg-white border rounded-lg p-4 grid grid-cols-1 md:grid-cols-5 gap-3"
       >
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama/email/lapangan"
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 text-sm"
         />
+
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 text-sm"
         >
           <option value="ALL">Semua Status</option>
           <option value="PENDING">Pending</option>
           <option value="APPROVED">Approved</option>
           <option value="REJECTED">Rejected</option>
         </select>
+
         <input
           type="date"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 text-sm"
         />
+
         <input
           type="date"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="border rounded px-3 py-2"
+          className="border rounded px-3 py-2 text-sm"
         />
+
         <button
           type="submit"
-          className="px-3 py-2 rounded bg-gray-900 text-white hover:bg-gray-800"
+          className="px-3 py-2 rounded bg-gray-900 text-white hover:bg-gray-800 text-sm"
         >
           Terapkan
         </button>
       </form>
 
-      {/* Table */}
+      {/* TABLE RESPONSIVE */}
       <div className="bg-white border rounded-lg overflow-x-auto shadow-sm">
-        <table className="w-full text-sm">
+        <table className="min-w-[850px] w-full text-sm">
           <thead className="bg-gray-100">
             <tr className="text-left">
               <th className="p-3">User</th>
@@ -134,6 +148,7 @@ export default function AdminApprovalPage() {
               <th className="p-3 text-right">Harga</th>
             </tr>
           </thead>
+
           <tbody>
             {!loading && rows.length === 0 && (
               <tr>
@@ -142,13 +157,22 @@ export default function AdminApprovalPage() {
                 </td>
               </tr>
             )}
+
             {rows.map((b) => (
-              <tr key={b.id} className="border-t hover:bg-gray-50 transition">
+              <tr
+                key={b.id}
+                className="border-t hover:bg-gray-50 transition"
+              >
                 <td className="p-3">{b.user?.name ?? "-"}</td>
                 <td className="p-3">{b.user?.email ?? "-"}</td>
                 <td className="p-3">{b.field?.name ?? "-"}</td>
-                <td className="p-3">{new Date(b.date).toLocaleDateString("id-ID")}</td>
-                <td className="p-3">{b.timeStart} - {b.timeEnd}</td>
+                <td className="p-3">
+                  {new Date(b.date).toLocaleDateString("id-ID")}
+                </td>
+                <td className="p-3">
+                  {b.timeStart} - {b.timeEnd}
+                </td>
+
                 <td className="p-3 font-semibold">
                   <span
                     className={`px-2 py-1 rounded text-xs text-white ${
@@ -162,15 +186,17 @@ export default function AdminApprovalPage() {
                     {b.status}
                   </span>
                 </td>
+
                 <td className="p-3 text-center">
                   {b.status === "PENDING" ? (
-                    <div className="flex gap-2 justify-center">
+                    <div className="flex gap-1 justify-center">
                       <button
                         onClick={() => handleAction(b.id, "approve")}
                         className="px-2 py-1 rounded bg-green-600 text-white hover:bg-green-700 text-xs"
                       >
                         Approve
                       </button>
+
                       <button
                         onClick={() => handleAction(b.id, "reject")}
                         className="px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700 text-xs"
@@ -179,20 +205,26 @@ export default function AdminApprovalPage() {
                       </button>
                     </div>
                   ) : (
-                    <span className="text-gray-400 text-xs">Tidak ada aksi</span>
+                    <span className="text-gray-400 text-xs">
+                      Tidak ada aksi
+                    </span>
                   )}
                 </td>
+
                 <td className="p-3 text-right">
                   Rp {(b.field?.price ?? 0).toLocaleString("id-ID")}
                 </td>
               </tr>
             ))}
           </tbody>
+
           {rows.length > 0 && (
             <tfoot>
               <tr className="bg-indigo-50 font-semibold">
                 <td className="p-3" colSpan={7}>Total</td>
-                <td className="p-3 text-right">Rp {total.toLocaleString("id-ID")}</td>
+                <td className="p-3 text-right">
+                  Rp {total.toLocaleString("id-ID")}
+                </td>
               </tr>
             </tfoot>
           )}

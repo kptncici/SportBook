@@ -13,7 +13,7 @@ export default function AdminApprovalPage() {
         cache: "no-store",
       });
       const data = await res.json();
-      setBookings(data);
+      setBookings(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to load bookings:", error);
     } finally {
@@ -36,13 +36,14 @@ export default function AdminApprovalPage() {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 text-blue-800">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+      <h1 className="text-xl md:text-2xl font-bold mb-6 text-blue-800">
         Manajemen Booking (Admin)
       </h1>
 
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="min-w-full border-collapse">
+      {/* WRAPPER RESPONSIVE */}
+      <div className="bg-white rounded-lg shadow border overflow-x-auto">
+        <table className="min-w-[650px] w-full border-collapse text-sm">
           <thead className="bg-blue-600 text-white">
             <tr>
               <th className="p-3 text-left">Nama</th>
@@ -75,22 +76,23 @@ export default function AdminApprovalPage() {
                   <td className="p-3">{b.user?.name ?? "-"}</td>
                   <td className="p-3">{b.field?.name ?? "-"}</td>
                   <td className="p-3">
-                    {new Date(b.date).toISOString().slice(0, 10)}
+                    {new Date(b.date).toLocaleDateString("id-ID")}
                   </td>
                   <td className="p-3">
                     {b.timeStart} - {b.timeEnd}
                   </td>
+
                   <td className="p-3 text-center">
-                    <div className="flex justify-center gap-2">
+                    <div className="flex justify-center gap-1 md:gap-2">
                       <Button
                         onClick={() => approve(b.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1"
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 md:text-sm md:px-3"
                       >
                         Approve
                       </Button>
                       <Button
                         onClick={() => reject(b.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1"
+                        className="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 md:text-sm md:px-3"
                       >
                         Reject
                       </Button>

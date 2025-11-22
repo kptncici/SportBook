@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   CalendarDays,
-  BarChart3,
   Home,
   ShieldCheck,
   Clock,
@@ -26,9 +25,6 @@ export default function Sidebar() {
 
   if (!role) return null;
 
-  // ---------------------------
-  // 🎯 ROLE-BASED MENU
-  // ---------------------------
   let menus: MenuItem[] = [];
 
   if (role === "USER") {
@@ -50,56 +46,52 @@ export default function Sidebar() {
     ];
   }
 
-  if (role === "OWNER") {
-    menus = [
-      { href: "/dashboard/owner", name: "Dashboard", icon: Home },
-      { href: "/dashboard/owner/fields", name: "Lapangan", icon: CalendarDays },
-      { href: "/dashboard/owner/transactions", name: "Transaksi", icon: CreditCard },
-      { href: "/dashboard/owner/revenue", name: "Revenue", icon: CreditCard },
-      { href: "/dashboard/owner/stats", name: "Statistik", icon: BarChart3 },
-      { href: "/dashboard/owner/summary", name: "Ringkasan", icon: CalendarDays },
-      { href: "/dashboard/owner/report", name: "Laporan", icon: BarChart3 },
-    ];
-  }
-
-  // ---------------------------
-  // 🧭 RENDER SIDEBAR
-  // ---------------------------
   return (
-    <aside className="hidden md:flex w-64 bg-white border-r shadow-sm flex-col">
-      {/* Header */}
-      <div className="px-6 py-5 text-2xl font-bold">
+    <aside
+      className="
+        fixed top-0 left-0
+        w-64 h-full
+        bg-white border-r shadow-sm
+        flex flex-col
+        z-40
+      "
+    >
+
+      <div className="px-4 py-4 text-xl font-bold">
         <span className="text-indigo-600">⚽</span> SportBook
       </div>
 
-      {/* Menu Navigation */}
-      <nav className="px-3 space-y-1 flex-1">
+      <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
         {menus.map((m) => {
           const Icon = m.icon;
-          const active = pathname === m.href || pathname.startsWith(m.href + "/");
+          const active =
+            pathname === m.href || pathname.startsWith(m.href + "/");
 
           return (
             <Link
               key={m.href}
               href={m.href}
               className={`flex items-center gap-2 px-4 py-3 rounded-lg transition ${
-                active ? "bg-indigo-600 text-white" : "hover:bg-gray-100 text-gray-700"
+                active
+                  ? "bg-indigo-600 text-white"
+                  : "hover:bg-gray-100 text-gray-700"
               }`}
             >
-              <Icon size={18} strokeWidth={2} />
+              <Icon size={18} />
               {m.name}
             </Link>
           );
         })}
       </nav>
 
-      {/* User Info */}
-      <div className="border-t mt-4 p-4 text-center">
+      <div className="border-t p-4 text-center">
         <p className="text-sm font-semibold text-gray-700">
           {session?.user?.name}
         </p>
-        <p className="text-xs text-gray-400 capitalize">{role.toLowerCase()}</p>
-        <p className="text-xs text-gray-400 mt-2">v0.1</p>
+        <p className="text-xs text-gray-400 capitalize">
+          {role.toLowerCase()}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">v0.1</p>
       </div>
     </aside>
   );

@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { PDFDocument } from "pdf-lib";
 
 export async function sendBookingEmail(
   email: string,
@@ -8,8 +7,8 @@ export async function sendBookingEmail(
 ) {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: Number(process.env.SMTP_PORT || 587),
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 587),
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
@@ -18,7 +17,7 @@ export async function sendBookingEmail(
     });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || "SportBook <noreply@sportbook.app>",
+      from: process.env.EMAIL_FROM, // 🟩 FIX UTAMA - konsisten
       to: email,
       subject: `E-Ticket Booking #${bookingId}`,
       html: `
@@ -31,6 +30,7 @@ export async function sendBookingEmail(
         {
           filename: `ticket-${bookingId}.pdf`,
           content: pdfBuffer,
+          contentType: "application/pdf", // 🟩 tambahan biar aman di Gmail
         },
       ],
     });

@@ -21,11 +21,15 @@ export async function sendMail(opts: {
   to: string;
   subject: string;
   html: string;
-  attachments?: Array<{ filename: string; content: Buffer; contentType?: string }>;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }>;
 }) {
   const t = getTransporter();
   return t.sendMail({
-    from: process.env.MAIL_FROM,
+    from: process.env.EMAIL_FROM, // 🟩 FIX UTAMA
     to: opts.to,
     subject: opts.subject,
     html: opts.html,

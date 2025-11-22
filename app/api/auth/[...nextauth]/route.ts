@@ -5,51 +5,53 @@ import { compare } from "bcryptjs";
 import { Role } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 1 hari
+    maxAge: 60 * 60 * 24, // 1 hari
   },
 
   providers: [
     CredentialsProvider({
       name: "Credentials",
+
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email dan password wajib diisi");
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            return null;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
+
+          if (!user) return null;
+
+          const valid = await compare(credentials.password, user.password);
+          if (!valid) return null;
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role as Role,
+          };
+        } catch (err) {
+          console.error("Authorize error:", err);
+          return null;
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user) {
-          throw new Error("User tidak ditemukan");
-        }
-
-        const valid = await compare(credentials.password, user.password);
-        if (!valid) {
-          throw new Error("Password salah");
-        }
-
-        // return user object ke JWT
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role as Role,
-        };
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      // Saat login baru
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
@@ -59,7 +61,6 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        // inject role dan id ke session user
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
       }
@@ -71,7 +72,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
 
-  // aktifkan log detail di dev
   debug: process.env.NODE_ENV === "development",
 };
 
