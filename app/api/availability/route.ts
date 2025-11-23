@@ -7,7 +7,6 @@ function pad(n: number) {
 }
 
 function timeToMinutes(t: string) {
-  // "HH:MM" -> minutes since midnight
   const [hh, mm] = t.split(":").map((x) => parseInt(x, 10));
   return hh * 60 + mm;
 }
@@ -23,17 +22,20 @@ export async function POST(req: Request) {
       );
     }
 
-    // parse date string (expected "YYYY-MM-DD")
+    // parse date "YYYY-MM-DD"
     const selectedDate = new Date(date + "T00:00:00");
     if (Number.isNaN(selectedDate.getTime())) {
-      return NextResponse.json({ error: "Tanggal tidak valid" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tanggal tidak valid" },
+        { status: 400 }
+      );
     }
 
     const now = new Date();
     const isToday = selectedDate.toDateString() === now.toDateString();
-    const nowMinutes = timeToMinutes(now.toTimeString().slice(0, 5)); // "HH:MM"
+    const nowMinutes = now.getHours() * 60 + now.getMinutes(); // FIX timezone
 
-    // generate slots 08:00 - 23:00 (08-09,...,22-23)
+    // Generate slots: 08:00–09:00 ... 22:00–23:00
     const SLOTS: { label: string; start: string; end: string }[] = [];
     for (let h = 8; h < 23; h++) {
       const start = `${pad(h)}:00`;
@@ -41,13 +43,13 @@ export async function POST(req: Request) {
       SLOTS.push({ label: `${start} - ${end}`, start, end });
     }
 
-    // build startOfDay and nextDay in ISO for reliable DB query
+    // DB range (full day)
     const startOfDay = new Date(selectedDate);
     startOfDay.setHours(0, 0, 0, 0);
+
     const nextDay = new Date(startOfDay);
     nextDay.setDate(nextDay.getDate() + 1);
 
-    // Ambil booking hari itu menggunakan range (menghindari masalah timezone)
     const bookings = await prisma.booking.findMany({
       where: {
         fieldId,
@@ -60,7 +62,6 @@ export async function POST(req: Request) {
       select: { timeStart: true, timeEnd: true, status: true },
     });
 
-    // convert bookings times to minutes for easier overlap check
     const bookingsMinutes = bookings.map((b) => ({
       startMin: timeToMinutes(b.timeStart),
       endMin: timeToMinutes(b.timeEnd),
@@ -73,13 +74,13 @@ export async function POST(req: Request) {
       const slotStartMin = timeToMinutes(slot.start);
       const slotEndMin = timeToMinutes(slot.end);
 
-      // Jika hari ini dan slot sudah lewat
-      if (isToday && slotEndMin <= nowMinutes) {
+      // FIX: Lewat waktu → pakai startMin
+      if (isToday && slotStartMin <= nowMinutes) {
         status = "Lewat Waktu";
         return { ...slot, status };
       }
 
-      // Cek overlap (true overlap)
+      // Check overlap booking
       const overlap = bookingsMinutes.find(
         (b) => b.startMin < slotEndMin && b.endMin > slotStartMin
       );
@@ -93,12 +94,8 @@ export async function POST(req: Request) {
       return { ...slot, status };
     });
 
-    // Untuk debugging saat deploy: (boleh hapus nanti)
     console.log(
-      `[availability] field=${fieldId} date=${date} isToday=${isToday} now=${now.toTimeString().slice(
-        0,
-        5
-      )} slots=${availability.length}`
+      `[availability] field=${fieldId} date=${date} isToday=${isToday} now=${now.toTimeString().slice(0,5)}`
     );
 
     return NextResponse.json(availability);
