@@ -35,7 +35,9 @@ export async function POST(req: Request) {
       },
     });
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password/${token}`;
+    // 🔥 FIX DI SINI – Pakai NEXTAUTH_URL, bukan BASE_URL
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const resetUrl = `${baseUrl}/reset-password/${token}`;
 
     // 📩 Kirim email
     await sendMail({
