@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* =========================================================
+   1) FIX: GUNAKAN PREFIX AGAR TIDAK MENGGANGGU TAILWIND
+========================================================= */
+
+:root {
+  --sport-primary: #0036d4;
+  --sport-primary-foreground: #ffffff;
+  --sport-secondary: #e3e8ff;
+  --sport-muted: #f0f4ff;
+  --sport-muted-foreground: #5b6b88;
+  --sport-accent: #e3e8ff;
+  --sport-border: #d8e3ff;
+  --sport-input: #d8e3ff;
+  --sport-ring: #7da8ff;
+
+  --sport-sidebar-bg: #ffffff;
+  --sport-sidebar-fg: #0b0b0b;
+  --sport-sidebar-primary: #0036d4;
+  --sport-sidebar-primary-fg: #ffffff;
+}
+
+/* =========================================================
+   2) FIX: THEME DARK TIDAK OVERRIDE TAILWIND
+========================================================= */
+
+.dark {
+  --sport-primary: #7da8ff;
+  --sport-primary-foreground: #0b0b0b;
+  --sport-secondary: #1b1f36;
+  --sport-muted: #1b1f36;
+  --sport-muted-foreground: #7ba4ff;
+  --sport-border: rgba(255,255,255,0.1);
+  --sport-input: rgba(255,255,255,0.15);
+
+  --sport-sidebar-bg: #0b0b0b;
+  --sport-sidebar-fg: #ffffff;
+  --sport-sidebar-primary: #4c8aff;
+  --sport-sidebar-primary-fg: #000;
+}
+
+/* =========================================================
+   3) SAFE OVERRIDE (tidak usik Tailwind! hanya style khusus)
+========================================================= */
+
+/* Body umum */
+body {
+  background: #ffffff;
+  color: #0b0b0b;
+}
+
+/* Tema stadion */
+.body-sport {
+  background: radial-gradient(circle at top, #0036d4, #000);
+}
+
+/* Frosted glass */
+.glass-card {
+  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(0,150,255,0.35);
+}
+
+/* Sport Button (AMAN, tidak override tailwind button) */
+.btn-sport {
+  background: linear-gradient(45deg, #005eff, #00b7ff);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(0,150,255,0.8);
+  transition: .25s;
+}
+
+.btn-sport:hover {
+  box-shadow: 0 0 26px rgba(0,150,255,1);
+  transform: scale(1.05);
+}
