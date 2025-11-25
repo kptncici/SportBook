@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Halaman publik
@@ -18,29 +18,25 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Ambil token session user
+  // Token user
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  /* ================================
-     PUBLIC ROUTES
-  ================================= */
+  // PUBLIC ROUTES
   if (publicRoutes.includes(pathname)) {
     if (!token) return NextResponse.next();
 
-    // Sudah login, redirect sesuai role
+    // Sudah login -> redirect berdasarkan role
     if (token.role === "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard/admin", request.url));
     }
 
-    return NextResponse.redirect(new URL("/dashboard", request.url)); // USER
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  /* ================================
-     DASHBOARD PROTECTED
-  ================================= */
+  // PROTECTED ROUTES
   if (pathname.startsWith("/dashboard")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -55,6 +51,7 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+// ACTIVE MIDDLEWARE
 export const config = {
   matcher: ["/((?!api|_next|static|.*\\..*).*)"],
 };
