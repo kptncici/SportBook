@@ -24,27 +24,22 @@ export async function GET(
     }
 
     // === Font aman ===
-    let fontPath: string | null = null;
-    const winFont = "C:\\Windows\\Fonts\\arial.ttf";
-    const linuxFont = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-    const bundledFont = path.join(process.cwd(), "public", "fonts", "DejaVuSans.ttf");
-    if (fs.existsSync(winFont)) fontPath = winFont;
-    else if (fs.existsSync(linuxFont)) fontPath = linuxFont;
-    else if (fs.existsSync(bundledFont)) fontPath = bundledFont;
+    // === Font dari project ===
+const fontPath = path.join(
+  process.cwd(),
+  "public",
+  "fonts",
+  "arial.ttf"
+);
 
-    // === Init PDF ===
-    const doc = new PDFDocument({
+// === Init PDF ===
+const doc = new PDFDocument({
   size: "A5",
   layout: "portrait",
   margin: 40,
-  font: fontPath || "Helvetica",
 });
 
-if (fontPath) {
-  doc.font(fontPath);
-} else {
-  doc.font("Helvetica");
-}
+doc.font(fontPath);
     const buffers: Buffer[] = [];
     doc.on("data", (chunk) => buffers.push(chunk));
     const endPromise = new Promise<Buffer>((resolve) =>
