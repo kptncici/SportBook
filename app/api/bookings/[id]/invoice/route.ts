@@ -34,12 +34,17 @@ export async function GET(
 
     // === Init PDF ===
     const doc = new PDFDocument({
-      size: "A5",
-      layout: "portrait",
-      margin: 40,
-      font: fontPath || "Times-Roman",
-    });
+  size: "A5",
+  layout: "portrait",
+  margin: 40,
+  font: fontPath || "Helvetica",
+});
 
+if (fontPath) {
+  doc.font(fontPath);
+} else {
+  doc.font("Helvetica");
+}
     const buffers: Buffer[] = [];
     doc.on("data", (chunk) => buffers.push(chunk));
     const endPromise = new Promise<Buffer>((resolve) =>
