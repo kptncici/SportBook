@@ -37,9 +37,17 @@ const doc = new PDFDocument({
   size: "A5",
   layout: "portrait",
   margin: 40,
+  autoFirstPage: false,
 });
 
-doc.font(fontPath);
+// register font manual
+doc.registerFont("Arial", fontPath);
+
+// buat halaman baru
+doc.addPage();
+
+// pakai font custom
+doc.font("Arial");
     const buffers: Buffer[] = [];
     doc.on("data", (chunk) => buffers.push(chunk));
     const endPromise = new Promise<Buffer>((resolve) =>
