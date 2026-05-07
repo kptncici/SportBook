@@ -23,7 +23,6 @@ export async function GET(
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // === Font aman ===
     // === Font dari project ===
 const fontPath = path.join(
   process.cwd(),
@@ -32,12 +31,17 @@ const fontPath = path.join(
   "arial.ttf"
 );
 
+if (!fs.existsSync(fontPath)) {
+  throw new Error("Font file not found: " + fontPath);
+}
+
 // === Init PDF ===
 const doc = new PDFDocument({
   size: "A5",
   layout: "portrait",
   margin: 40,
   autoFirstPage: false,
+  bufferPages: true,
 });
 
 // register font manual
