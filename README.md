@@ -1,36 +1,197 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SportBook
 
-## Getting Started
+SportBook is a modern fullstack sports booking and management platform built using Next.js, Prisma, Supabase, and Midtrans integration.
 
-First, run the development server:
+## 🚀 Features
+
+* User Authentication
+* Admin Dashboard
+* Sports Booking System
+* Midtrans Payment Gateway Integration
+* Transaction Management
+* Responsive UI
+* Role-based Access Control
+* Prisma ORM Database Management
+* Email Notification System
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+* Next.js 16
+* React
+* Tailwind CSS
+* TypeScript
+
+## Backend
+
+* Next.js API Routes
+* Prisma ORM
+* Supabase PostgreSQL
+
+## Payment Gateway
+
+* Midtrans Sandbox / Production
+
+## Authentication
+
+* NextAuth.js
+
+---
+
+# 📦 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/kptncici/sportbook.git
+```
+
+Move into the project directory:
+
+```bash
+cd sportbook
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+# ⚙️ Environment Variables
+
+Create a `.env` file and configure the following:
+
+```env
+DATABASE_URL=
+DIRECT_URL=
+
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=
+
+RESEND_API_KEY=
+```
+
+---
+
+# 🧩 Prisma Setup
+
+Generate Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Push database schema:
+
+```bash
+npx prisma db push
+```
+
+---
+
+# ▶️ Running the Project
+
+Development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+# 🚀 Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Recommended deployment platform:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Production deployment steps:
 
-## Deploy on Vercel
+1. Push project to GitHub
+2. Import repository into Vercel
+3. Add Environment Variables
+4. Deploy project
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 💳 Midtrans Sandbox Testing
+
+Use Midtrans sandbox test card:
+
+```text
+Card Number: 4811 1111 1111 1114
+CVV: 123
+Expiry: 12/30
+OTP: 112233
+```
+
+---
+
+# 👤 Demo Accounts
+
+## Admin
+
+```text
+Email: admin@sportbook.com
+Password: admin123
+```
+
+## User
+
+```text
+Email: pratamadirga@sportbook.id
+Password: Athlete123!
+```
+
+---
+
+# 📁 Project Structure
+
+```bash
+app/
+components/
+prisma/
+public/
+lib/
+```
+
+---
+
+# 📌 Status
+
+✅ Fullstack Application
+✅ Payment Integration
+✅ Database Connected
+✅ Production Ready
+
+---
+
+# 📜 License
+
+This project is built for educational and portfolio purposes.
+
+---
+
+# 👨‍💻 Developer
+
+Developed by NURFADILLA RHAMADANI
