@@ -24,6 +24,7 @@
     "date-fns": "^4.1.0",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
+    "fontkit": "^2.0.4",
     "lucide-react": "^0.552.0",
     "midtrans-client": "^1.4.3",
     "next": "^16.2.5",
