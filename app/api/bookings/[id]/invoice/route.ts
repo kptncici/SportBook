@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import PDFDocument from "pdfkit";
-import fs from "fs";
-import path from "path";
-import QRCode from "qrcode";
 
 export const runtime = "nodejs";
 
@@ -16,136 +12,92 @@ export async function GET(
 
     const booking = await prisma.booking.findUnique({
       where: { id },
-      include: { user: true, field: true },
+      include: {
+        user: true,
+        field: true,
+      },
     });
 
     if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+      return new NextResponse("Booking not found", {
+        status: 404,
+      });
     }
 
-    // === Font dari project ===
-const fontPath = path.join(
-  process.cwd(),
-  "public",
-  "fonts",
-  "arial.ttf"
-);
+    const html = `
+      <html>
+        <head>
+          <title>SportBook E-Ticket</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background: #f5f5f5;
+              padding: 40px;
+            }
 
-if (!fs.existsSync(fontPath)) {
-  throw new Error("Font file not found: " + fontPath);
-}
+            .card {
+              max-width: 600px;
+              margin: auto;
+              background: white;
+              border-radius: 16px;
+              padding: 30px;
+              box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
 
-// === Init PDF ===
-const doc = new PDFDocument({
-  size: "A5",
-  layout: "portrait",
-  margin: 40,
-  autoFirstPage: false,
-  bufferPages: true,
-});
+            h1 {
+              color: #1E3A8A;
+              margin-bottom: 20px;
+            }
 
-// register font manual
-doc.registerFont("Arial", fontPath);
+            p {
+              font-size: 16px;
+              margin: 10px 0;
+            }
 
-// buat halaman baru
-doc.addPage();
+            .status {
+              display: inline-block;
+              padding: 6px 12px;
+              border-radius: 8px;
+              background: #DCFCE7;
+              color: #166534;
+              font-weight: bold;
+            }
+          </style>
+        </head>
 
-// pakai font custom
-doc.font("Arial");
-    const buffers: Buffer[] = [];
-    doc.on("data", (chunk) => buffers.push(chunk));
-    const endPromise = new Promise<Buffer>((resolve) =>
-      doc.on("end", () => resolve(Buffer.concat(buffers)))
-    );
+        <body>
+          <div class="card">
+            <h1>SPORTBOOK E-TICKET</h1>
 
-    // === Header ===
-    const logoPath = path.join(process.cwd(), "public", "logo.png");
-    if (fs.existsSync(logoPath)) {
-      doc.image(logoPath, 40, 30, { width: 60 });
-    }
+            <p><b>Nama:</b> ${booking.user?.name ?? "-"}</p>
+            <p><b>Email:</b> ${booking.user?.email ?? "-"}</p>
+            <p><b>Lapangan:</b> ${booking.field?.name ?? "-"}</p>
+            <p><b>Tanggal:</b> ${booking.date.toISOString().slice(0, 10)}</p>
+            <p><b>Jam:</b> ${booking.timeStart} - ${booking.timeEnd}</p>
 
-    doc
-      .fontSize(20)
-      .fillColor("#1E3A8A")
-      .text("SPORTBOOK", 110, 40)
-      .fontSize(10)
-      .fillColor("#555")
-      .text("E-Ticket Booking Lapangan", 110, 65);
+            <p>
+              <b>Status:</b>
+              <span class="status">${booking.status}</span>
+            </p>
 
-    doc.moveDown(2);
+            <p><b>Booking ID:</b> ${booking.id}</p>
+          </div>
+        </body>
+      </html>
+    `;
 
-    // === Garis Pembatas ===
-    doc
-      .moveTo(40, 100)
-      .lineTo(380, 100)
-      .strokeColor("#1E3A8A")
-      .stroke();
-
-    // === Info Utama ===
-    const infoY = 120;
-    doc.fontSize(12).fillColor("#111");
-
-    const info = [
-      [`Nama`, booking.user?.name ?? booking.user?.email ?? "-"],
-      [`Lapangan`, booking.field?.name ?? "-"],
-      [`Tanggal`, booking.date.toISOString().slice(0, 10)],
-      [`Waktu`, `${booking.timeStart} - ${booking.timeEnd}`],
-      [`Status`, booking.status],
-      [`Booking ID`, booking.id],
-    ];
-
-    info.forEach(([label, value], i) => {
-      doc.text(`${label}:`, 50, infoY + i * 25);
-      doc.text(value, 160, infoY + i * 25);
-    });
-
-    // === Harga ===
-    const price = booking.field?.price ?? 0;
-    doc
-      .fontSize(12)
-      .fillColor("#1E3A8A")
-      .text("Total Pembayaran", 50, infoY + 160);
-    doc
-      .fontSize(16)
-      .fillColor("#111")
-      .text(`Rp ${price.toLocaleString("id-ID")}`, 50, infoY + 180);
-
-    // === QR Code ===
-    const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify/${booking.id}`;
-    const qrData = await QRCode.toDataURL(verifyUrl);
-    const qrImage = Buffer.from(qrData.split(",")[1], "base64");
-    doc.image(qrImage, 230, infoY + 140, { width: 100 });
-
-    doc
-      .fontSize(8)
-      .fillColor("#666")
-      .text("Scan untuk verifikasi booking", 230, infoY + 245, {
-        width: 120,
-        align: "center",
-      });
-
-    // === Footer ===
-    doc
-      .fontSize(10)
-      .fillColor("#555")
-      .text("Terima kasih telah menggunakan SportBook", 0, 400, {
-        align: "center",
-      });
-
-    // === End ===
-    doc.end();
-    const pdfBuffer = await endPromise;
-    const pdfBytes = new Uint8Array(pdfBuffer);
-
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(html, {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="eticket-${booking.id}.pdf"`,
+        "Content-Type": "text/html",
       },
     });
   } catch (err) {
     console.error("❌ E-Ticket Error:", err);
-    return NextResponse.json({ error: "Failed to generate E-Ticket" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Failed to generate E-Ticket" },
+      { status: 500 }
+    );
   }
 }
